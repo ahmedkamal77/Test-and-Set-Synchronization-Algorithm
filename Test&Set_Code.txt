@@ -1,0 +1,60 @@
+// Test-and-Set.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <thread>
+using namespace std;
+
+bool lock_1 = false;
+int shared_resource = 0;
+
+bool Test_and_Set(bool* key);
+void process_1();
+void process_2();
+
+
+int main()
+{
+    int x;
+
+    thread thread_1 = thread(process_1);
+    thread thread_2 = thread(process_2);
+
+    thread_2.join();
+    thread_1.join();
+
+    cout << shared_resource << endl;
+    cin >> x;
+}
+
+bool Test_and_Set(bool* key)
+{
+    bool x = *key;
+    *key = true;
+    return x;
+}
+
+void process_1()
+{
+    while (Test_and_Set(&lock_1)) cout << "Process(1) is stuck !! " << endl;  //do nothing
+
+    cout << "Process(1) starts its execution " << endl;
+    shared_resource += 2;
+    //PIECE OF CODE
+
+    cout << "Process(1) release the lock !! " << endl;
+    lock_1 = false;  //release the shared resource
+}
+
+void process_2()
+{
+    while (Test_and_Set(&lock_1)) cout << "Process 2 is stuck !!"<<endl;  //do nothing
+
+    cout << "Process(2) starts its execution " << endl;
+    shared_resource = 10;
+    //PIECE OF CODE
+
+    cout << "Process(2) release the lock !! " << endl;
+    lock_1 = false;  //release the shared resource
+}
+
